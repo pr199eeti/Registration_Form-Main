@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration Successful</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <style>
+        /* General styles for the body */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f4f8;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #050505;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        /* Styling for the main container */
+        .main {
+            background-color: #cab1b1;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            margin: auto;
+            position: relative;
+            z-index: 20; /* Ensure it's always on top */
+        }
+
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        /* Canvas for fireworks */
+        canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10; /* Lower z-index so fireworks are behind the message */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-3"></div>
+            <div class="col-md-6 main">
+                <h1>🎉 Registration Successful 🎉</h1>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firework canvas -->
+    <canvas id="fireworkCanvas"></canvas>
+
+    <!-- JavaScript for fireworks effect -->
+    <script>
+        // Set up canvas
+        const canvas = document.getElementById('fireworkCanvas');
+        const ctx = canvas.getContext('2d');
+        const particles = [];
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        class Particle {
+            constructor(x, y, radius, color, velocity) {
+                this.x = x;
+                this.y = y;
+                this.radius = radius;
+                this.color = color;
+                this.velocity = velocity;
+                this.alpha = 1; // Controls the fade-out of particles
+            }
+
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.alpha;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+                ctx.closePath();
+                ctx.restore();
+            }
+
+            update() {
+                this.draw();
+                this.velocity.x *= 0.98; // Slow down the particle
+                this.velocity.y *= 0.98;
+                this.velocity.y += 0.05; // Gravity effect
+                this.x += this.velocity.x;
+                this.y += this.velocity.y;
+                this.alpha -= 0.01; // Fade-out effect
+            }
+        }
+
+        function createFirework(x, y) {
+            const particleCount = 50;
+            const angleIncrement = (Math.PI * 2) / particleCount;
+            const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffdd00', '#ff00ff'];
+
+            for (let i = 0; i < particleCount; i++) {
+                const angle = i * angleIncrement;
+                const velocity = {
+                    x: Math.cos(angle) * (Math.random() * 4 + 2),
+                    y: Math.sin(angle) * (Math.random() * 4 + 2)
+                };
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                particles.push(new Particle(x, y, 3, color, velocity));
+            }
+        }
+
+        function animate() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            particles.forEach((particle, index) => {
+                if (particle.alpha <= 0) {
+                    particles.splice(index, 1);
+                } else {
+                    particle.update();
+                }
+            });
+
+            requestAnimationFrame(animate);
+        }
+
+        canvas.addEventListener('click', (event) => {
+            createFirework(event.clientX, event.clientY);
+        });
+
+        animate();
+
+        // Automatically trigger fireworks when the page loads
+        window.onload = () => {
+            setInterval(() => {
+                createFirework(Math.random() * canvas.width, Math.random() * canvas.height);
+            }, 1000); // Fireworks every second
+        };
+    </script>
+</body>
+</html>
